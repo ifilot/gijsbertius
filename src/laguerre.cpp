@@ -21,58 +21,68 @@
 
 #include "laguerre.h"
 
-/* calculate the Laguerre polynomial */
-
+/**
+ * @brief      Laguerre polynomial
+ *
+ * @param[in]  n     nth Laguerre polynomial
+ * @param[in]  x     value x to calculate
+ *
+ * @return     value at x of the nth Laguerre polynomial
+ */
 double laguerre(int n, double x) {
-    int i;
-
-    if ( n < 0 ) {
+    if(n < 0) {
         return -1;
     }
 
     double v[n+1];
     v[0] = 1.0;
 
-    if ( n == 0 ) {
+    if(n == 0) {
         return 1.0;
     }
 
     v[1] = 1.0 - x;
 
-    for ( i = 2; i <= n; i++ ) {
-            v[i] = ( ( ( double ) ( 2 * i - 1 ) - x ) * v[(i-1)]
-                                     + ( double ) (     - i + 1 )                    * v[(i-2)] )
-                                     / ( double ) (         i         );
+    for (int i = 2; i <= n; i++) {
+        v[i] = (((double)(2 * i - 1) - x) * v[(i-1)]
+               + (double) (-i + 1) * v[(i-2)])
+               / (double) (i);
     }
 
     return v[n];
 }
 
-/* calculate the associated Laguerre polynomial */
-
+/**
+ * @brief      Associated Laguerre polynomial
+ *
+ * @param[in]  n     nth Laguerre polynomial
+ * @param[in]  m     value m
+ * @param[in]  x     value x to calculate
+ *
+ * @return     value at x of the nth/mth Associated Laguerre polynomial
+ */
 double laguerre_l(int n, int m, double x) {
-    int i;
     double v[n+1];
 
-    if ( n < 0 ) {
+    if (n < 0) {
         return -1;
     }
 
     v[0] = 1.0;
-    for (i = 1; i <= n; i++) {
+    for (int i = 1; i <= n; i++) {
         v[i] = 0.0;
     }
 
-    if ( n == 0 ) {
+    if (n == 0) {
         return v[0];
     }
 
-    v[1] = ( double ) ( m + 1 ) - x;
+    v[1] = (double)(m + 1) - x;
 
-    for ( i = 2; i <= n; i++ ) {
-            v[i]            = ( ( ( double ) (     m + 2 * i - 1 ) - x        ) * v[i-1]
-                                        + ( double ) ( - m         - i + 1 )                    * v[i-2] )
-                                        / ( double ) (                     i         );
+    for (int i = 2; i <= n; i++) {
+        v[i] = (((double)(m + 2 * i - 1) - x) * v[i-1]
+               + ( double ) (-m - i + 1 ) * v[i-2])
+               / ( double ) (i);
     }
 
     return v[n];

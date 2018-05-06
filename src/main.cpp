@@ -22,8 +22,7 @@
 #include <chrono>
 #include <string>
 #include <tclap/CmdLine.h>
-
-#define BOUNDING_BOX 75.0
+#include <boost/format.hpp>
 
 #include "config.h"
 #include "scalar_field.h"
@@ -48,17 +47,26 @@ int main(int argc, char **argv) {
 
         cmd.parse(argc, argv);
 
+        std::cout << "--------------------------------------------------------------" << std::endl;
+        std::cout << "Executing Gijsbertius v." << PROGRAM_VERSION << std::endl;
+        std::cout << "Author: Ivo Filot <ivo@ivofilot.nl>" << std::endl;
+        std::cout << "--------------------------------------------------------------" << std::endl;
+
         int n = arg_n.getValue();
         int l = arg_l.getValue();
         int m = arg_m.getValue();
         const std::string output_filename = arg_o.getValue();
 
+        auto start = std::chrono::system_clock::now();
+
         WaveFunction wf(n,l,m);
         Integrator in(&wf);
-        double isovalue = in.find_isosurface_volume(0, 100, 1e5);
 
-        unsigned int gridsize = 201;
-        double resolution = BOUNDING_BOX * 2.0 / (double)gridsize;
+        double r = 0;
+        double isovalue = in.find_isosurface_volume(0, 100, 1e5, &r);
+
+        unsigned int gridsize = 301;
+        double resolution = std::ceil(r * 2.0) * 2.0 / (double)gridsize;
         ScalarField sf(gridsize, resolution);
         sf.load_wavefunction(wf);
 
@@ -68,7 +76,13 @@ int main(int argc, char **argv) {
 
         IsoSurfaceMesh ism(&sf, &is);
         ism.construct_mesh(true);
-        ism.write_obj(output_filename, "test", "test");
+        const std::string name = (boost::format("%i%i%i") % n % l % m).str();
+        ism.write_obj(output_filename, name, name);
+
+        auto end = std::chrono::system_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << boost::format("Total elapsed time: %f ms\n") % elapsed.count();
+        std::cout << "--------------------------------------------------------------" << std::endl;
 
         return 0;
 

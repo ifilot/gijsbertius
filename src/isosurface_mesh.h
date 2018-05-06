@@ -100,6 +100,16 @@ private:
      */
     unsigned int get_index_vertex(const glm::vec3 v);
 
+    /**
+     * @brief      Calculates the normals from scalar field.
+     */
+    void calculate_normals_from_scalar_field();
+
+    /**
+     * @brief      Calculates the normals from polygons
+     */
+    void calculate_normals_from_polygons();
+
 };
 
 #endif //_OUTPUT_H

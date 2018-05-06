@@ -30,11 +30,6 @@
 #include <fstream>
 #include <math.h>
 
-#include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/filesystem.hpp>
 #include <glm/glm.hpp>
 
 #include "wavefunction.h"

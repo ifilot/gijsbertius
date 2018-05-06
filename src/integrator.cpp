@@ -25,34 +25,36 @@ Integrator::Integrator(WaveFunction *_wf) {
     this->wf = _wf;
 };
 
-double Integrator::integrate_radial_density(double a, double b, int steps) {
+double Integrator::integrate_radial_density(double a, double b, int steps, double* r) {
     double s = 0;
     double h = (b-a)/steps;
-    double r = 0;
-    for (int i = 0; i < steps; ++i) {
-        r = a + h * (double)i;
+    *r = 0;
 
-        s += (this->wf->radial_distribution_function(r) +
-              4 * this->wf->radial_distribution_function(r + h / 2.0) +
-              this->wf->radial_distribution_function(r + h)) / 6.0;
+    for (int i = 0; i < steps; ++i) {
+        *r = a + h * (double)i;
+
+        s += (this->wf->radial_distribution_function(*r) +
+              4 * this->wf->radial_distribution_function(*r + h / 2.0) +
+              this->wf->radial_distribution_function(*r + h)) / 6.0;
     }
 
     return h * s;
 }
 
-double Integrator::find_isosurface_volume(double a, double b, int steps) {
+double Integrator::find_isosurface_volume(double a, double b, int steps, double* r) {
     double s = 0;
     double h = (b-a)/steps;
-    double r = 0;
-    for (int i = 0; i < steps; ++i) {
-        r = a + h * (double)i;
+    *r = 0;
 
-        s += (this->wf->radial_distribution_function(r) +
-              4 * this->wf->radial_distribution_function(r + h / 2.0) +
-              this->wf->radial_distribution_function(r + h)) / 6.0;
+    for (int i = 0; i < steps; ++i) {
+        *r = a + h * (double)i;
+
+        s += (this->wf->radial_distribution_function(*r) +
+              4 * this->wf->radial_distribution_function(*r + h / 2.0) +
+              this->wf->radial_distribution_function(*r + h)) / 6.0;
         if(h * s >= 0.95) {
-            return sqrt(this->wf->radial_distribution_function(r) /
-                       (4.0 * M_PI * r * r));
+            return std::sqrt(this->wf->radial_distribution_function(*r) /
+                       (4.0 * M_PI * (*r) * (*r)));
         }
     }
 

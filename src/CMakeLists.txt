@@ -27,8 +27,8 @@ project (gijsbertius)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules )
 
 # prepare configuration file
-SET(VERSION_MAJOR "0")
-SET(VERSION_MINOR "1")
+SET(VERSION_MAJOR "1")
+SET(VERSION_MINOR "0")
 SET(VERSION_MICRO "0")
 configure_file(config.h.in ../src/config.h @ONLY)
 
@@ -67,7 +67,7 @@ set (BOOST_ALL_DYN_LINK OFF)
 # Include libraries
 find_package(PkgConfig REQUIRED)
 find_package(GLM REQUIRED)
-find_package(Boost COMPONENTS regex iostreams filesystem REQUIRED)
+find_package(Boost REQUIRED)
 pkg_check_modules(TCLAP tclap REQUIRED)
 
 # Set include folders

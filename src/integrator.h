@@ -31,8 +31,8 @@ private:
 
 public:
     Integrator(WaveFunction *_wf);
-    double integrate_radial_density(double a, double b, int steps);
-    double find_isosurface_volume(double a, double b, int steps);
+    double integrate_radial_density(double a, double b, int steps, double* r);
+    double find_isosurface_volume(double a, double b, int steps, double* r);
     double integrate_spherical_harmonic(double a, double b, int steps);
     double integrate_x2(double a, double b, int steps); //testroutine
 };

@@ -58,29 +58,9 @@ void IsoSurfaceMesh::construct_mesh(bool center) {
         this->vertices[it.second] = it.first;
     }
 
-    double dev = 0.01;
-    this->normals.resize(this->vertices.size());
+    //this->reduce_vertices();
 
-    // calculate normal vectors
-    #pragma omp parallel for
-    for(unsigned int i=0; i<this->vertices.size(); i++) {
-        // get derivatives
-        double dx0 = sf->get_value_interp(this->vertices[i][0] - dev, this->vertices[i][1], this->vertices[i][2]);
-        double dx1 = sf->get_value_interp(this->vertices[i][0] + dev, this->vertices[i][1], this->vertices[i][2]);
-
-        double dy0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] - dev, this->vertices[i][2]);
-        double dy1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] + dev, this->vertices[i][2]);
-
-        double dz0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] - dev);
-        double dz1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] + dev);
-
-        glm::vec3 normal((dx1 - dx0) / (2.0 * dev),
-                         (dy1 - dy0) / (2.0 * dev),
-                         (dz1 - dz0) / (2.0 * dev));
-        normal = glm::normalize(normal);
-
-        this->normals[i] = normal;
-    }
+    this->calculate_normals_from_polygons();
 
     // center structure
     if(center) {
@@ -117,7 +97,6 @@ void IsoSurfaceMesh::write_obj(const std::string& filename, const std::string& h
     std::stringstream local[nrthreads];
 
     // parallel writing vertices
-
     #pragma omp parallel
     {
         size_t threadnum = omp_get_thread_num();
@@ -232,5 +211,68 @@ unsigned int IsoSurfaceMesh::get_index_vertex(const glm::vec3 v) {
     } else {
         this->vertices_map.emplace(v, this->vertices_map.size());
         return this->get_index_vertex(v);
+    }
+}
+
+/**
+ * @brief      Calculates the normals from scalar field.
+ */
+void IsoSurfaceMesh::calculate_normals_from_scalar_field() {
+    static const double dev = 0.01;
+    this->normals.resize(this->vertices.size());
+
+    // calculate normal vectors
+    #pragma omp parallel for
+    for(unsigned int i=0; i<this->vertices.size(); i++) {
+        // get derivatives
+        double dx0 = sf->get_value_interp(this->vertices[i][0] - dev, this->vertices[i][1], this->vertices[i][2]);
+        double dx1 = sf->get_value_interp(this->vertices[i][0] + dev, this->vertices[i][1], this->vertices[i][2]);
+
+        double dy0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] - dev, this->vertices[i][2]);
+        double dy1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] + dev, this->vertices[i][2]);
+
+        double dz0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] - dev);
+        double dz1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] + dev);
+
+        glm::vec3 normal((dx1 - dx0) / (2.0 * dev),
+                         (dy1 - dy0) / (2.0 * dev),
+                         (dz1 - dz0) / (2.0 * dev));
+        normal = glm::normalize(normal);
+
+        this->normals[i] = normal;
+    }
+}
+
+/**
+ * @brief      Calculates the normals from polygons
+ */
+void IsoSurfaceMesh::calculate_normals_from_polygons() {
+    this->normals.resize(this->vertices.size(), glm::vec3(0.0f, 0.0f, 0.0f));
+
+    #pragma omp parallel for
+    for(unsigned int i=0; i<this->indices.size(); i += 3) {
+        const unsigned int idx1 = this->indices[i];
+        const unsigned int idx2 = this->indices[i+1];
+        const unsigned int idx3 = this->indices[i+2];
+
+        const glm::vec3& v1 = this->vertices[idx1];
+        const glm::vec3& v2 = this->vertices[idx2];
+        const glm::vec3& v3 = this->vertices[idx3];
+
+        float area = glm::length(glm::cross(v2 - v1, v3 - v1)) / 2.0f;
+        glm::vec3 direction = glm::cross(v2 - v1, v3 - v1);
+
+        if(area < 0.0) {
+            std::cout << area << std::endl;
+        }
+
+        this->normals[idx1] += direction / area;
+        this->normals[idx2] += direction / area;
+        this->normals[idx3] += direction / area;
+    }
+
+    #pragma omp parallel for
+    for(unsigned int i=0; i<this->normals.size(); i++) {
+        this->normals[i] = glm::normalize(this->normals[i]);
     }
 }

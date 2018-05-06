@@ -31,8 +31,6 @@
  * @return     { description_of_the_return_value }
  */
 double legendre (int n, double x) {
-    int i;
-
     if(n < 0) {
         return -1;
     }
@@ -46,53 +44,49 @@ double legendre (int n, double x) {
 
     v[1] = x;
 
-    for ( i = 2; i <= n; i++ ) {
-            v[i] =         ( ( double ) ( 2 * i - 1 ) * x        * v[i-1]
-                                 - ( double ) (         i - 1 ) *                v[i-2] )
-                                 / ( double ) (         i         );
+    for(int i = 2; i <= n; i++ ) {
+        v[i] = ((double) (2 * i - 1) * x * v[i-1]
+               - (double) (i - 1) * v[i-2] )
+               / (double) (i);
     }
 
     return v[n];
 }
 
 /**
- * @brief      associated legendre function
+ * @brief      Associated Legendre polynomial
  *
- * @param[in]  n     n
- * @param[in]  m     m
- * @param[in]  x     value x
+ * @param[in]  n     nth Legendre polynomial
+ * @param[in]  m     value m
+ * @param[in]  x     value x to calculate
  *
- * @return     value
+ * @return     value at x of the nth/mth Associated Legendre polynomial
  */
 double legendre_p (int n, int m, double x) {
-    double fact;
-    int i;
-    int j;
-    int k;
     double v[n+1];
 
-    for ( i = 0; i < n + 1; i++ ) {
+    for (int i = 0; i < n + 1; i++) {
         v[i] = 0.0;
     }
 
-    if ( m <= n ) {
+    if(m <= n ) {
         v[m] = 1.0;
 
-        fact = 1.0;
-        for ( k = 0; k < m; k++ ) {
-            v[m] *= - fact * sqrt ( 1.0 - x * x);
+        double fact = 1.0;
+        for(int k = 0; k < m; k++) {
+            v[m] *= -fact * std::sqrt(1.0 - x * x);
             fact += 2.0;
         }
     }
 
-    if ( m + 1 <= n ) {
+    if(m + 1 <= n ) {
         v[m+1] = x * ( double ) ( 2 * m + 1 ) * v[m];
     }
 
-    for ( j = m + 2; j <= n; j++ ) {
-            v[j] = ( ( double ) ( 2 * j         - 1 ) * x * v[(j-1)]
-                    + ( double ) (     - j - m + 1 ) *                v[(j-2)] )
-                    / ( double ) (         j - m         );
+    for(int j = m + 2; j <= n; j++ ) {
+        v[j] = ((double)(2 * j - 1 ) * x * v[(j-1)]
+                + (double)(- j - m + 1 ) * v[(j-2)])
+                / (double)(j - m);
     }
 
     return v[n];

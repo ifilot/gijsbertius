@@ -22,7 +22,25 @@
 #ifndef _LAGUERRE_H
 #define _LAGUERRE_H
 
+/**
+ * @brief      Laguerre polynomial
+ *
+ * @param[in]  n     nth Laguerre polynomial
+ * @param[in]  x     value x to calculate
+ *
+ * @return     value at x of the nth Laguerre polynomial
+ */
 double laguerre(int n, double x);
+
+/**
+ * @brief      Associated Laguerre polynomial
+ *
+ * @param[in]  n     nth Laguerre polynomial
+ * @param[in]  m     value m
+ * @param[in]  x     value x to calculate
+ *
+ * @return     value at x of the nth/mth Associated Laguerre polynomial
+ */
 double laguerre_l(int n, int m, double x);
 
 #endif

@@ -24,7 +24,25 @@
 
 #include <cmath>
 
+/**
+ * @brief      Legendre polynomial
+ *
+ * @param[in]  n     nth Legendre polynomial
+ * @param[in]  x     value x to calculate
+ *
+ * @return     value at x of the nth Legendre polynomial
+ */
 double legendre (int n, double x);
+
+/**
+ * @brief      Associated Legendre polynomial
+ *
+ * @param[in]  n     nth Legendre polynomial
+ * @param[in]  m     value m
+ * @param[in]  x     value x to calculate
+ *
+ * @return     value at x of the nth/mth Associated Legendre polynomial
+ */
 double legendre_p (int n, int m, double x);
 
 #endif
