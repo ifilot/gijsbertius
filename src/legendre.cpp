@@ -35,7 +35,7 @@ double legendre (int n, double x) {
         return -1;
     }
 
-    double v[n];
+    std::vector<double> v(n+1, 0.0);
     v[0] = 1.0;
 
     if(n < 1) {
@@ -63,11 +63,7 @@ double legendre (int n, double x) {
  * @return     value at x of the nth/mth Associated Legendre polynomial
  */
 double legendre_p (int n, int m, double x) {
-    double v[n+1];
-
-    for (int i = 0; i < n + 1; i++) {
-        v[i] = 0.0;
-    }
+    std::vector<double> v(n+1, 0.0);
 
     if(m <= n ) {
         v[m] = 1.0;

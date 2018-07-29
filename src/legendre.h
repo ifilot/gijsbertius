@@ -23,6 +23,7 @@
 #define _LEGENDRE_H
 
 #include <cmath>
+#include <vector>
 
 /**
  * @brief      Legendre polynomial
