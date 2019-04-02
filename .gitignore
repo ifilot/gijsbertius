@@ -31,3 +31,4 @@ build/*
 CHGCAR*
 *.png
 src/config.h
+*.pov-state

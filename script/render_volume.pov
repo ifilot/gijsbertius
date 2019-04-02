@@ -46,10 +46,7 @@ light_source {
             density_file df3 "../build/510.df3"
             interpolate 3
             color_map {
-                [0.0000 rgb <0,0,0>]
-                [0.1000 rgb <1,0,0>]
-                [0.2000 rgb <1,0.6,0>]
-                [1.0000 rgb <1,1,1>]
+                #include "YlGn.inc"
             }
         }
     }
@@ -62,4 +59,5 @@ box {
     interior {DENS}
     scale DIAG
     translate -DIAG / 2
+    rotate <360*clock, 0, 0>
 }
