@@ -67,6 +67,45 @@ void ScalarField::load_wavefunction(const WaveFunction &wf) {
     }
 }
 
+/**
+ * @brief      Saves to df3 density file
+ *
+ * @param[in]  filename  The filename
+ */
+void ScalarField::save_to_df3(const std::string& filename) {
+    // get largest and smallest value
+    auto minmax = std::minmax_element(this->gridptr.begin(), this->gridptr.end());
+    double min = *minmax.first;
+    double max = *minmax.second;
+    double ival = max - min;
+
+    std::ofstream out(filename, std::ios::binary);
+
+    // introduce dummy variable to store byteswapped value;
+    // note that df3 needs to be stored in lower endian!
+    uint16_t byteswap = 0;
+
+    // write data size
+    uint16_t nx = this->grid_dimensions[0];
+    uint16_t ny = this->grid_dimensions[1];
+    uint16_t nz = this->grid_dimensions[2];
+
+    byteswap = (nx>>8) | (nx<<8);
+    out.write((char*)&byteswap, sizeof(uint16_t));
+    byteswap = (ny>>8) | (ny<<8);
+    out.write((char*)&byteswap, sizeof(uint16_t));
+    byteswap = (nz>>8) | (nz<<8);
+    out.write((char*)&byteswap, sizeof(uint16_t));
+
+    for(unsigned int i=0; i<this->gridptr.size(); i++) {
+        uint16_t val = (uint16_t)((this->gridptr[i] - min) / ival * 65536);
+        byteswap = (val>>8) | (val<<8);
+        out.write((char*)&byteswap, sizeof(uint16_t));
+    }
+
+    out.close();
+}
+
 /* set a value in the grid by specifying its grid location */
 void ScalarField::set_value(unsigned int i, unsigned int j, unsigned int k, double _value) {
     this->gridptr[this->get_idx(i, j, k)] = _value;

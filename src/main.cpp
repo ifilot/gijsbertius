@@ -39,11 +39,13 @@ int main(int argc, char **argv) {
         TCLAP::ValueArg<int> arg_l("l","l","Angular quantum number", true, 0, "0");
         TCLAP::ValueArg<int> arg_m("m","m","Magnetic quantum number", true, 0, "0");
         TCLAP::ValueArg<std::string> arg_o("o","o","Output file", true, "test.obj", "test.obj");
+        TCLAP::ValueArg<std::string> arg_d("d","d","Density file", false, "", "density.d3d");
 
         cmd.add(arg_n);
         cmd.add(arg_l);
         cmd.add(arg_m);
         cmd.add(arg_o);
+        cmd.add(arg_d);
 
         cmd.parse(argc, argv);
 
@@ -78,6 +80,11 @@ int main(int argc, char **argv) {
         ism.construct_mesh(true);
         const std::string name = (boost::format("%i%i%i") % n % l % m).str();
         ism.write_obj(output_filename, name, name);
+
+        std::string densityfile = arg_d.getValue();
+        if(!densityfile.empty()) {
+            sf.save_to_df3(densityfile);
+        }
 
         auto end = std::chrono::system_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);

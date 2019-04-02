@@ -29,6 +29,7 @@
 #include <sstream>
 #include <fstream>
 #include <math.h>
+#include <algorithm>
 
 #include <glm/glm.hpp>
 
@@ -66,6 +67,13 @@ public:
      *
      */
     double get_value_interp(double x, double y, double z) const;
+
+    /**
+     * @brief      Saves to df3 density file
+     *
+     * @param[in]  filename  The filename
+     */
+    void save_to_df3(const std::string& filename);
 
     /**
      * @brief      test whether point is inside unit cell

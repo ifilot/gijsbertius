@@ -26,3 +26,8 @@ make -j9
 ```
 ./gijsbertius -n 5 -l 1 -m 0 -o 510.obj
 ```
+
+## Povray
+```
+povray render.pov -H1024 -W1024
+```
