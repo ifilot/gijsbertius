@@ -26,7 +26,7 @@ Integrator::Integrator(WaveFunction *_wf) {
 };
 
 double Integrator::integrate_radial_density(double a, double b, int steps, double* r) {
-    double s = 0;
+    double s = 0; // sum
     double h = (b-a)/steps;
     *r = 0;
 
@@ -49,6 +49,7 @@ double Integrator::find_isosurface_volume(double a, double b, int steps, double*
     for (int i = 0; i < steps; ++i) {
         *r = a + h * (double)i;
 
+        // use Simpson's rule
         s += (this->wf->radial_distribution_function(*r) +
               4 * this->wf->radial_distribution_function(*r + h / 2.0) +
               this->wf->radial_distribution_function(*r + h)) / 6.0;
@@ -88,5 +89,5 @@ double Integrator::integrate_x2(double a, double b, int steps) {
               (std::pow(r + h, 2.0))) / 6.0;
     }
 
-    return h * s; // due to azimuthal function
+    return h * s;
 }

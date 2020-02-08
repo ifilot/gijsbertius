@@ -31,3 +31,16 @@ make -j9
 ```
 povray render.pov -H1024 -W1024
 ```
+
+## Converting to stl
+Install `openctm-tools`
+```
+sudo apt install openctm-tools
+```
+
+and run (e.g.)
+
+```
+ctmconv 100.obj 100.stl
+
+```

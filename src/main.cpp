@@ -61,11 +61,30 @@ int main(int argc, char **argv) {
 
         auto start = std::chrono::system_clock::now();
 
+        // Constructing wave function and checking that these are normalized
+        double dummy = 0.0;
         WaveFunction wf(n,l,m);
         Integrator in(&wf);
+        double radint = in.integrate_radial_density(0, 100, 1e5, &dummy);
+        std::cout << "[Check] Radial integration over all space yields: " << radint << std::endl;
+        if(std::abs(radint - 1.0) < 1e-12) {
+            std::cout << "[Check] Radial wave function is normalized." << std::endl;
+        } else {
+            throw std::runtime_error("Error. Radial wave function does not integrate up to unity.");
+        }
+        double angint = in.integrate_spherical_harmonic(0, M_PI, 1000);
+        std::cout << "[Check] Angular integration over all space yields: " << angint << std::endl;
+        if(std::abs(angint - 1.0) < 1e-12) {
+            std::cout << "[Check] Angular wave function is normalized." << std::endl;
+        } else {
+            throw std::runtime_error("Error. Angular wave function does not integrate up to unity.");
+        }
 
-        double r = 0;
+        std::cout << std::endl;
+        double r = 0; // reset r value
+        std::cout <<  "Finding isosurface volume" << std::endl;
         double isovalue = in.find_isosurface_volume(0, 100, 1e5, &r);
+        std::cout << "Isosurface volume of 95\% found at r=" << r << " bohr." << std::endl << std::endl;
 
         unsigned int gridsize = 301;
         double resolution = std::ceil(r * 2.0) * 2.0 / (double)gridsize;
@@ -73,6 +92,7 @@ int main(int argc, char **argv) {
         sf.load_wavefunction(wf);
 
         // analyze the grid and generate the isosurface using the isovalue
+        std::cout << "Constructing isosurface" << std::endl;
         IsoSurface is(&sf);
         is.marching_cubes(isovalue);
 
@@ -80,6 +100,7 @@ int main(int argc, char **argv) {
         ism.construct_mesh(true);
         const std::string name = (boost::format("%i%i%i") % n % l % m).str();
         ism.write_obj(output_filename, name, name);
+        std::cout << "[Note] Set Forward to Y-forward and Up to Z-forward when importing Blender." << std::endl;
 
         std::string densityfile = arg_d.getValue();
         if(!densityfile.empty()) {
@@ -88,6 +109,7 @@ int main(int argc, char **argv) {
 
         auto end = std::chrono::system_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << std::endl;
         std::cout << boost::format("Total elapsed time: %f ms\n") % elapsed.count();
         std::cout << "--------------------------------------------------------------" << std::endl;
 

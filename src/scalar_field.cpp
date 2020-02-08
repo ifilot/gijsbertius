@@ -35,7 +35,6 @@ ScalarField::ScalarField(unsigned int _gridsize, double _resolution) :
 }
 
 void ScalarField::load_wavefunction(const WaveFunction &wf) {
-
     double r = 0;
     double phi = 0;
     double theta = 0;

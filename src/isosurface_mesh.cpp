@@ -58,9 +58,7 @@ void IsoSurfaceMesh::construct_mesh(bool center) {
         this->vertices[it.second] = it.first;
     }
 
-    //this->reduce_vertices();
-
-    this->calculate_normals_from_polygons();
+    this->calculate_normals_from_scalar_field();
 
     // center structure
     if(center) {
@@ -128,7 +126,6 @@ void IsoSurfaceMesh::write_obj(const std::string& filename, const std::string& h
     }
 
     // parallel writing normals
-
     #pragma omp parallel
     {
         size_t threadnum = omp_get_thread_num();
@@ -145,10 +142,8 @@ void IsoSurfaceMesh::write_obj(const std::string& filename, const std::string& h
 
         char buffer[100];
         unsigned int cnt = 0;
-
         for(size_t i=start; i<stop; i++) {
-
-            sprintf(buffer, "vn %6.4f  %6.4f  %6.4f\n", this->normals[i][0], this->normals[i][1], this->normals[i][2]);
+            sprintf(buffer, "vn %6.4f  %6.4f  %6.4f\n", -this->normals[i][0], this->normals[i][1], this->normals[i][2]);
             local[threadnum] << buffer;
         }
     }
@@ -219,9 +214,9 @@ unsigned int IsoSurfaceMesh::get_index_vertex(const glm::vec3 v) {
  */
 void IsoSurfaceMesh::calculate_normals_from_scalar_field() {
     static const double dev = 0.01;
-    this->normals.resize(this->vertices.size());
+    this->normals.resize(this->vertices.size(), glm::vec3(0.0f, 0.0f, 0.0f));
 
-    // calculate normal vectors
+    // calculate normal vectors for each vertex
     #pragma omp parallel for
     for(unsigned int i=0; i<this->vertices.size(); i++) {
         // get derivatives
