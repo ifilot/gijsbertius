@@ -143,7 +143,7 @@ void IsoSurfaceMesh::write_obj(const std::string& filename, const std::string& h
         char buffer[100];
         unsigned int cnt = 0;
         for(size_t i=start; i<stop; i++) {
-            sprintf(buffer, "vn %6.4f  %6.4f  %6.4f\n", -this->normals[i][0], this->normals[i][1], this->normals[i][2]);
+            sprintf(buffer, "vn %6.4f  %6.4f  %6.4f\n", this->normals[i][0], this->normals[i][1], this->normals[i][2]);
             local[threadnum] << buffer;
         }
     }
