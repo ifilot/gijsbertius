@@ -24,7 +24,7 @@ make -j9
 
 ## Usage
 ```
-./gijsbertius -n 5 -l 1 -m 0 -o 510.obj
+./gijsbertius -n 5 -l 1 -m 0 -o 510.ply
 ```
 
 ## Povray
@@ -41,6 +41,6 @@ sudo apt install openctm-tools
 and run (e.g.)
 
 ```
-ctmconv 100.obj 100.stl
+ctmconv 100.ply 100.stl
 
 ```

@@ -99,8 +99,8 @@ int main(int argc, char **argv) {
         IsoSurfaceMesh ism(&sf, &is);
         ism.construct_mesh(true);
         const std::string name = (boost::format("%i%i%i") % n % l % m).str();
-        ism.write_obj(output_filename, name, name);
-        std::cout << "[Note] Set Forward to Y-forward and Up to Z-forward when importing Blender." << std::endl;
+        ism.write_ply(output_filename, name, name);
+        // std::cout << "[Note] Set Forward to Y-forward and Up to Z-forward when importing Blender." << std::endl;
 
         std::string densityfile = arg_d.getValue();
         if(!densityfile.empty()) {
