@@ -34,35 +34,51 @@ ScalarField::ScalarField(unsigned int _gridsize, double _resolution) :
     this->init();
 }
 
-void ScalarField::load_wavefunction(const WaveFunction &wf) {
+void ScalarField::load_wavefunction(const WaveFunction &wf, bool sgnd) {
     double r = 0;
     double phi = 0;
     double theta = 0;
 
     unsigned int i=0, j=0, k=0;
 
-    for(double x = -(double)(gridsize - 1)/2.0 * resolution; x <= (gridsize - 1)/2.0 * resolution; x += resolution) {
-        j = 0;
+    if(sgnd) {
+        for(double x = -(double)(gridsize - 1)/2.0 * resolution; x <= (gridsize - 1)/2.0 * resolution; x += resolution) {
+            j = 0;
+            for(double y = -(double)(gridsize - 1)/2.0 * resolution; y <= (gridsize - 1)/2.0 * resolution; y += resolution) {
+                k = 0;
+                for(double z = -(double)(gridsize - 1)/2.0 * resolution; z <= (gridsize - 1)/2.0 * resolution; z += resolution) {
+                    /* transform to spherical coordinates */
+                    r = std::sqrt(x*x + y*y + z*z);
+                    phi = std::atan2(y, x);
+                    theta = std::acos(z / r);
 
-        for(double y = -(double)(gridsize - 1)/2.0 * resolution; y <= (gridsize - 1)/2.0 * resolution; y += resolution) {
-            k = 0;
-
-            for(double z = -(double)(gridsize - 1)/2.0 * resolution; z <= (gridsize - 1)/2.0 * resolution; z += resolution) {
-                /* transform to spherical coordinates */
-                r = std::sqrt(x*x + y*y + z*z);
-                phi = std::atan2(y, x);
-                theta = std::acos(z / r);
-
-                /* obtain wavefunction value from object */
-                this->set_value(i, j, k, std::abs(wf.value(r, theta, phi)));
-
-                k++;
+                    /* obtain wavefunction value from object */
+                    this->set_value(i, j, k, wf.value(r, theta, phi));
+                    k++;
+                }
+                j++;
             }
-
-            j++;
+            i++;
         }
+    } else {
+        for(double x = -(double)(gridsize - 1)/2.0 * resolution; x <= (gridsize - 1)/2.0 * resolution; x += resolution) {
+            j = 0;
+            for(double y = -(double)(gridsize - 1)/2.0 * resolution; y <= (gridsize - 1)/2.0 * resolution; y += resolution) {
+                k = 0;
+                for(double z = -(double)(gridsize - 1)/2.0 * resolution; z <= (gridsize - 1)/2.0 * resolution; z += resolution) {
+                    /* transform to spherical coordinates */
+                    r = std::sqrt(x*x + y*y + z*z);
+                    phi = std::atan2(y, x);
+                    theta = std::acos(z / r);
 
-        i++;
+                    /* obtain wavefunction value from object */
+                    this->set_value(i, j, k, std::abs(wf.value(r, theta, phi)));
+                    k++;
+                }
+                j++;
+            }
+            i++;
+        }
     }
 }
 

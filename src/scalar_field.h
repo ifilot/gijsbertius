@@ -52,7 +52,7 @@ public:
 
     ScalarField(unsigned int _gridsize, double _resolution);
 
-    void load_wavefunction(const WaveFunction &wf);
+    void load_wavefunction(const WaveFunction &wf, bool sgnd = false);
 
     /*
      * double get_value_interp(x,y,z)

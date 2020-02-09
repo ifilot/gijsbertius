@@ -210,7 +210,9 @@ void IsoSurfaceMesh::write_ply(const std::string& filename, const std::string& h
         myfile << "format binary_little_endian 1.0" << std::endl;
     }
 
-    myfile << "comment test" << std::endl;
+    myfile << "comment object constructed using Gijsbertius " << PROGRAM_VERSION << std::endl;
+    myfile << "comment hydrogen-like orbital wave function" << std::endl;
+    myfile << "comment orbital: " << name << std::endl;
     myfile << "element vertex " << this->vertices.size() << std::endl;
     myfile << "property float x" << std::endl;
     myfile << "property float y" << std::endl;
@@ -266,22 +268,33 @@ void IsoSurfaceMesh::calculate_normals_from_scalar_field() {
     #pragma omp parallel for
     for(unsigned int i=0; i<this->vertices.size(); i++) {
         // get derivatives
-        double dx0 = sf->get_value_interp(this->vertices[i][0] - dev, this->vertices[i][1], this->vertices[i][2]);
-        double dx1 = sf->get_value_interp(this->vertices[i][0] + dev, this->vertices[i][1], this->vertices[i][2]);
+        double dx0 = sf->get_value_interp(this->vertices[i][0] - 2.0 * dev, this->vertices[i][1], this->vertices[i][2]);
+        double dx1 = sf->get_value_interp(this->vertices[i][0] - dev, this->vertices[i][1], this->vertices[i][2]);
+        double dx2 = sf->get_value_interp(this->vertices[i][0] + dev, this->vertices[i][1], this->vertices[i][2]);
+        double dx3 = sf->get_value_interp(this->vertices[i][0] + 2.0 * dev, this->vertices[i][1], this->vertices[i][2]);
 
-        double dy0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] - dev, this->vertices[i][2]);
-        double dy1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] + dev, this->vertices[i][2]);
+        double dy0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] - 2.0 * dev, this->vertices[i][2]);
+        double dy1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] - dev, this->vertices[i][2]);
+        double dy2 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] + dev, this->vertices[i][2]);
+        double dy3 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] + 2.0 * dev, this->vertices[i][2]);
 
-        double dz0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] - dev);
-        double dz1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] + dev);
+        double dz0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] - 2.0 * dev);
+        double dz1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] - dev);
+        double dz2 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] + dev);
+        double dz3 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] + 2.0 * dev);
 
-        glm::vec3 normal((dx1 - dx0) / (2.0 * dev),
-                         (dy1 - dy0) / (2.0 * dev),
-                         (dz1 - dz0) / (2.0 * dev));
-        normal = glm::normalize(normal);
+        double cc = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2]);
 
-        // note that the normal is the reverse of the gradient
-        this->normals[i] = -normal;
+        // calculate gradient using 5 point stencil (note that center point is not used when calculating gradient)
+        double dx = (dx0 - 8.0 * dx1 + 8.0 * dx2 - dx3) / (12.0 * dev);
+        double dy = (dy0 - 8.0 * dy1 + 8.0 * dy2 - dy3) / (12.0 * dev);
+        double dz = (dz0 - 8.0 * dz1 + 8.0 * dz2 - dz3) / (12.0 * dev);
+
+        double sx = copysign(-1.0, this->vertices[i][0]);
+        double sy = copysign(-1.0, this->vertices[i][1]);
+        double sz = copysign(-1.0, this->vertices[i][2]);
+
+        this->normals[i] = glm::normalize(glm::vec3(dx * sx, dy * sy, dz * sz));
     }
 }
 

@@ -27,6 +27,7 @@
 #include <vector>
 #include <omp.h>
 #include <unordered_map>
+#include "config.h"
 
 #define GLM_FORCE_SWIZZLE
 #include <glm/glm.hpp>

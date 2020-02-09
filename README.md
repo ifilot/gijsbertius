@@ -24,13 +24,9 @@ make -j9
 
 ## Usage
 ```
-./gijsbertius -n 5 -l 1 -m 0 -o 510.ply
+./gijsbertius -n 5 -l 1 -m 0 -o 510.ply [-s]
 ```
-
-## Povray
-```
-povray render.pov -H1024 -W1024
-```
+The `-s` tag splits positive and negative contributions and generates two files.
 
 ## Converting to stl
 Install `openctm-tools`
