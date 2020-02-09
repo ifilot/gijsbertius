@@ -19,7 +19,7 @@
  *                                                                        *
  **************************************************************************/
 
- #include "wavefunction.h"
+#include "wavefunction.h"
 
 WaveFunction::WaveFunction(int _n, int _l, int _m) {
     if(_n < 1) {
@@ -74,14 +74,11 @@ double WaveFunction::polar_density(double theta) const {
  * of the Laguerre polynomial and/or the normalization constant. In fact,
  * Griffiths makes a point of this (ref 16, page 152).
  *
- * In the end, I checkedmy Laguerre and Legendre polynomials by comparing
+ * In the end, I checked my Laguerre and Legendre polynomials by comparing
  * these at Wolfram Alpha (www.wolframalpha.com) and
  * use some reverse engineering to find the proper normalisation constants. I
  * am not 100% sure, but at least the radial distribution function integrates
  * to unity for all the wave functions.
- *
- * If you can resolve this issue, please contact me and I will gladly give
- * you a very nice beer (or other drink of your choice) for your troubles!!
  */
 
 double WaveFunction::radial_function(double r) const {
@@ -93,6 +90,13 @@ double WaveFunction::radial_function(double r) const {
                  laguerre_l(n-l-1, 2*l+1, rho);
 }
 
+/*
+ * Calculate polar part wave function
+ *
+ * @param theta - polar angle
+ *
+ * @return polar part of the wave function evaluated at angle theta
+ */
 double WaveFunction::polar_function(double theta) const {
     double pre = sqrt((double)(2 * l + 1) * (double)factorial(l - std::abs(m)) /
         (double)factorial(l + std::abs(m)));
@@ -100,6 +104,13 @@ double WaveFunction::polar_function(double theta) const {
     return pre * legendre_p(l, std::abs(m), cos(theta));
 }
 
+/*
+ * Calculate azimuthal part of the wave function
+ *
+ * @param phi - azimuthal angle
+ *
+ * @return azimuthal part of the wave function evaluated at angle phi
+ */
 double WaveFunction::azimuthal_function(double phi) const {
     const double pre = 1.0 / sqrt(4 * M_PI);
 
