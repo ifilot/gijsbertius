@@ -60,7 +60,7 @@ private:
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texcoords;
-    std::vector<unsigned int> indices;
+    std::vector<uint32_t> indices;
 
     const ScalarField* sf;
     const IsoSurface* is;
@@ -121,6 +121,10 @@ private:
      */
     void calculate_normals_from_polygons();
 
+    /**
+     * @brief      ensure indices are in CCW order with respect to face normals
+     */
+    void align_vertices_order_with_normals();
 };
 
 #endif //_OUTPUT_H

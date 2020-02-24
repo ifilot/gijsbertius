@@ -58,7 +58,11 @@ void IsoSurfaceMesh::construct_mesh(bool center) {
         this->vertices[it.second] = it.first;
     }
 
+    // calculate vertex normals based on gradient of scalar field
     this->calculate_normals_from_scalar_field();
+
+    // set order of vertex indices based on face normals
+    this->align_vertices_order_with_normals();
 
     // center structure
     if(center) {
@@ -234,7 +238,7 @@ void IsoSurfaceMesh::write_ply(const std::string& filename, const std::string& h
     static const uint8_t uchar_three = 3;
     for(unsigned int i=0; i<this->indices.size(); i+=3) {
         myfile.write((char*)&uchar_three, sizeof(uint8_t));
-        myfile.write((char*)&this->indices[i], sizeof(unsigned int) * 3);
+        myfile.write((char*)&this->indices[i], sizeof(uint32_t) * 3);
     }
 
     myfile.close();
@@ -268,33 +272,33 @@ void IsoSurfaceMesh::calculate_normals_from_scalar_field() {
     #pragma omp parallel for
     for(unsigned int i=0; i<this->vertices.size(); i++) {
         // get derivatives
-        double dx0 = sf->get_value_interp(this->vertices[i][0] - 2.0 * dev, this->vertices[i][1], this->vertices[i][2]);
-        double dx1 = sf->get_value_interp(this->vertices[i][0] - dev, this->vertices[i][1], this->vertices[i][2]);
-        double dx2 = sf->get_value_interp(this->vertices[i][0] + dev, this->vertices[i][1], this->vertices[i][2]);
-        double dx3 = sf->get_value_interp(this->vertices[i][0] + 2.0 * dev, this->vertices[i][1], this->vertices[i][2]);
+        double dx0 = this->sf->get_value_interp(this->vertices[i][0] - 2.0 * dev, this->vertices[i][1], this->vertices[i][2]);
+        double dx1 = this->sf->get_value_interp(this->vertices[i][0] - dev, this->vertices[i][1], this->vertices[i][2]);
+        double dx2 = this->sf->get_value_interp(this->vertices[i][0] + dev, this->vertices[i][1], this->vertices[i][2]);
+        double dx3 = this->sf->get_value_interp(this->vertices[i][0] + 2.0 * dev, this->vertices[i][1], this->vertices[i][2]);
 
-        double dy0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] - 2.0 * dev, this->vertices[i][2]);
-        double dy1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] - dev, this->vertices[i][2]);
-        double dy2 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] + dev, this->vertices[i][2]);
-        double dy3 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] + 2.0 * dev, this->vertices[i][2]);
+        double dy0 = this->sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] - 2.0 * dev, this->vertices[i][2]);
+        double dy1 = this->sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] - dev, this->vertices[i][2]);
+        double dy2 = this->sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] + dev, this->vertices[i][2]);
+        double dy3 = this->sf->get_value_interp(this->vertices[i][0], this->vertices[i][1] + 2.0 * dev, this->vertices[i][2]);
 
-        double dz0 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] - 2.0 * dev);
-        double dz1 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] - dev);
-        double dz2 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] + dev);
-        double dz3 = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] + 2.0 * dev);
+        double dz0 = this->sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] - 2.0 * dev);
+        double dz1 = this->sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] - dev);
+        double dz2 = this->sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] + dev);
+        double dz3 = this->sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2] + 2.0 * dev);
 
-        double cc = sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2]);
+        double cc = this->sf->get_value_interp(this->vertices[i][0], this->vertices[i][1], this->vertices[i][2]);
 
         // calculate gradient using 5 point stencil (note that center point is not used when calculating gradient)
         double dx = (dx0 - 8.0 * dx1 + 8.0 * dx2 - dx3) / (12.0 * dev);
         double dy = (dy0 - 8.0 * dy1 + 8.0 * dy2 - dy3) / (12.0 * dev);
         double dz = (dz0 - 8.0 * dz1 + 8.0 * dz2 - dz3) / (12.0 * dev);
 
-        double sx = copysign(-1.0, this->vertices[i][0]);
-        double sy = copysign(-1.0, this->vertices[i][1]);
-        double sz = copysign(-1.0, this->vertices[i][2]);
-
-        this->normals[i] = glm::normalize(glm::vec3(dx * sx, dy * sy, dz * sz));
+        if(cc < 0) { // flip normal vector for negative isovalue
+            this->normals[i] = glm::normalize(glm::vec3(-dx, -dy, -dz));
+        } else {
+            this->normals[i] = glm::normalize(glm::vec3(dx, dy, dz));
+        }
     }
 }
 
@@ -329,5 +333,28 @@ void IsoSurfaceMesh::calculate_normals_from_polygons() {
     #pragma omp parallel for
     for(unsigned int i=0; i<this->normals.size(); i++) {
         this->normals[i] = glm::normalize(this->normals[i]);
+    }
+}
+
+/**
+ * @brief      ensure indices are in CCW order with respect to face normals
+ */
+void IsoSurfaceMesh::align_vertices_order_with_normals() {
+    #pragma omp parallel for
+    for(unsigned int i=0; i<this->indices.size(); i+=3) {
+        glm::vec3 a = this->vertices[this->indices[i]];
+        glm::vec3 b = this->vertices[this->indices[i+1]];
+        glm::vec3 c = this->vertices[this->indices[i+2]];
+
+        // calculate normal based on index order
+        glm::vec3 norm = glm::normalize(glm::cross(a-b, c-b));
+
+        // calculate face norm
+        glm::vec3 facenorm = (this->normals[this->indices[i]] + this->normals[this->indices[i+1]] + this->normals[this->indices[i+2]]) / 3.0f;
+
+        // flip the indices if the normals are not aligned
+        if(glm::dot(norm, facenorm) < 0.0) {
+            std::swap(this->indices[i+1], this->indices[i+2]);
+        }
     }
 }
